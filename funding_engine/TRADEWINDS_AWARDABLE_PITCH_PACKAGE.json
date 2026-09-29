@@ -1,0 +1,8 @@
+{
+    "marketplace_target": "DoD CDAO Tradewinds Solutions Marketplace (Public Interface)",
+    "contractor": "Humphrey Virtual Farms LLC",
+    "cage_code": "1AHA8",
+    "status": "PUBLIC_TRADEWINDS_INTERFACE_ACTIVE",
+    "data_rights": "DFARS 252.227-7018 (GPR)",
+    "tradewinds_integrity_token": "PUBLIC_TRADEWINDS_TOKEN_SHA256"
+}
