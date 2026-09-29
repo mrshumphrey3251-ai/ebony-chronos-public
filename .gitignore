@@ -1,0 +1,31 @@
+﻿# ========================================================================
+# EBONY CHRONOS SOVEREIGN REPOSITORY GITIGNORE BASELINE
+# Humphrey Virtual Farms LLC (CAGE: 1AHA8)
+# ========================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C / C++ / Rust Object Files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Temporary files & Editor debris
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and Secret Overrides
+.env
+*.local
