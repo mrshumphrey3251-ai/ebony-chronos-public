@@ -1,0 +1,14 @@
+{
+    "program_name": "DIU Drone Dominance Program - Phase 3 Acquisition (Public Interface)",
+    "contractor": "Humphrey Virtual Farms LLC",
+    "cage_code": "1AHA8",
+    "status": "PUBLIC_BRIEF_INTERFACE_ACTIVE",
+    "mission_focus": [
+        "Deep Strike (20 km)",
+        "Close Quarter Battle (CQB)",
+        "GNSS-Denied",
+        "Comms-Denied"
+    ],
+    "data_rights": "DFARS 252.227-7018 (GPR)",
+    "solution_brief_integrity_token": "PUBLIC_DIU_BRIEF_TOKEN_SHA256"
+}
