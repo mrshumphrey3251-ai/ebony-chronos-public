@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EBONY CHRONOS - TELEPROMPTER & Q&A</title>
+<style>
+  :root {
+    --bg-dark: #0a0d14;
+    --panel-bg: #101622;
+    --border: #1e293b;
+    --accent-gold: #fbbf24;
+    --accent-cyan: #38bdf8;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
+  body { background: var(--bg-dark); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding: 8px; }
+  header { background: #06080d; border: 1px solid var(--border); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; margin-bottom: 6px; }
+  .badge-gold { background: rgba(251,191,36,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+  .btn-sm { background: #1e293b; color: #fff; border: 1px solid #334155; padding: 4px 10px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+  .btn-sm:hover { background: #334155; }
+  .content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .slide-card { background: var(--panel-bg); border-left: 4px solid var(--accent-gold); padding: 12px; border-radius: 4px; border: 1px solid var(--border); }
+  .slide-card h3 { color: var(--accent-gold); font-size: 14px; margin-bottom: 6px; }
+  .slide-card p { font-size: 13px; line-height: 1.5; color: #e2e8f0; }
+  .qa-box { background: #0c1322; border-left: 4px solid var(--accent-cyan); padding: 10px; border-radius: 4px; border: 1px solid var(--border); font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <div style="font-weight:bold; font-size:12px; color:var(--accent-cyan);">Q3 // EXECUTIVE SPEECH TELEPROMPTER</div>
+  <div style="display:flex; gap:6px; align-items:center;">
+    <button class="btn-sm" onclick="nav(-1)">Prev</button>
+    <button class="btn-sm" onclick="nav(1)">Next</button>
+    <span class="badge-gold" id="slide-num">SLIDE 1/10</span>
+  </div>
+</header>
+<div class="content">
+  <div class="slide-card">
+    <h3 id="card-title">SLIDE #01: Executive Title & Sovereign Authority</h3>
+    <p id="card-text">"Distinguished evaluators, I am Jeffery Humphrey, CEO of Humphrey Virtual Farms LLC (CAGE: 1AHA8). Today we demonstrate the Ebony Chronos Sovereign Sentinel Platform—a fully air-gapped, zero-RF autonomous tactical edge operating system designed for contested EW environments."</p>
+  </div>
+  <div class="qa-box">
+    <div style="font-weight:bold; color:var(--accent-cyan); margin-bottom:4px;">LIVE INGRESS STREAM (PORT 8502)</div>
+    <div><strong>[DoD Evaluator]:</strong> GPS-denied odometry drift rate? -> <span style="color:var(--accent-gold);">Passive optical flow bounds drift < 0.12% without RF emissions.</span></div>
+    <div style="margin-top:4px;"><strong>[Commerce]:</strong> $500K non-dilutive match model? -> <span style="color:var(--accent-gold);">$0 cash escrow required. Satisfied 100% via allowable non-cash in-kind assets.</span></div>
+  </div>
+</div>
+<script>
+  let idx = 0;
+  const slides = [
+    { t: "SLIDE #01: Executive Title & Sovereign Authority", p: "Humphrey Virtual Farms LLC (CAGE: 1AHA8). Presenter: CEO Jeffery Humphrey. Bare-metal sovereign sentinel architecture." },
+    { t: "SLIDE #02: Operational Threat: Contested Spectrum & EW", p: "Commercial drones fail under saturated EW jamming and GPS denial. Chronos operates fully autonomous with zero RF emissions." },
+    { t: "SLIDE #03: Bare-Metal Chronos Engine Architecture", p: "Sub-millisecond 50 Hz bare-metal tick execution, local SQLite Merkle audit ledger, and physical sensor abstraction." },
+    { t: "SLIDE #04: Tactical Mission Set 1: CQB & Warfighter BFT", p: "Dismounted squad integration, micro-UAS tunnel clearing, and real-time warfighter physiological triage." },
+    { t: "SLIDE #05: Tactical Mission Set 2: Deep Strike & Swarm Retrans", p: "20-kilometer standoff interdiction, low probability of intercept (LPI) optical and acoustic meshing." },
+    { t: "SLIDE #06: Federal Track 1: DoD SBIR Direct-to-Phase II ($1.8M)", p: "Direct-to-Phase II acceleration for zero-RF passive optical flow autonomy transitioning to operational test units." },
+    { t: "SLIDE #07: Federal Track 2: DIU Phase 3 Drone Dominance ($450M)", p: "$7,500 unit flyaway target, 60,000 mass-attritable kinetic UAS, 100% NDAA Section 848 supply chain compliance." },
+    { t: "SLIDE #08: Federal Track 3: DoD CDAO Tradewinds Marketplace", p: "Achieved Awardable status for rapid-procurement OTA contracts across DoD service branches." },
+    { t: "SLIDE #09: State Track: Oklahoma Aerospace Corridor & OCAST OARS", p: "$500K non-dilutive state matching grant request. 100% allowable in-kind non-cash contributions ($0 liquid cash escrow required)." },
+    { t: "SLIDE #10: Statutory Governance & Joint Acquisition Roadmap", p: "DFARS 252.227-7018 GPR commercial data rights, NIST SP 800-82, MIL-STD-810H, and complete technical sovereignty." }
+  ];
+  function nav(d) {
+    idx = Math.max(0, Math.min(slides.length - 1, idx + d));
+    document.getElementById('card-title').innerText = slides[idx].t;
+    document.getElementById('card-text').innerText = slides[idx].p;
+    document.getElementById('slide-num').innerText = 'SLIDE ' + (idx + 1) + '/10';
+  }
+</script>
+</body>
+</html>
