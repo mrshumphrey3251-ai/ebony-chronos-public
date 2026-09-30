@@ -65,7 +65,7 @@
     color: var(--accent-cyan);
     text-transform: uppercase;
   }
-  .bay-controls { display: flex; gap: 6px; }
+  .bay-controls { display: flex; gap: 6px; align-items: center; }
   .btn-sm {
     background: #1e293b;
     color: var(--text-primary);
@@ -76,12 +76,23 @@
     cursor: pointer;
   }
   .btn-sm:hover { background: #334155; }
+  .btn-accent {
+    background: rgba(56,189,248,0.2);
+    color: var(--accent-cyan);
+    border: 1px solid var(--accent-cyan);
+  }
+  .btn-accent:hover { background: rgba(56,189,248,0.4); }
   .bay-body { flex: 1; overflow-y: auto; padding: 10px; position: relative; }
 
-  /* BAY 1: Video Ingest */
-  #video-container { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  /* BAY 1: Dual-Mode Workspace */
+  #bay1-capture-view { width: 100%; height: 100%; display: flex; flex-direction: column; background: #000; position: relative; }
   #video-feed { width: 100%; height: 100%; object-fit: contain; }
-  .video-placeholder { color: var(--text-muted); text-align: center; font-size: 12px; }
+  #video-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 12px; text-align: center; padding: 20px; }
+  
+  #bay1-embed-view { width: 100%; height: 100%; display: none; flex-direction: column; }
+  .embed-toolbar { display: flex; gap: 6px; padding: 6px; background: #0c1322; border-bottom: 1px solid var(--border); align-items: center; }
+  .embed-toolbar input { flex: 1; background: #080c14; border: 1px solid var(--border); color: #fff; padding: 4px 8px; font-size: 11px; border-radius: 3px; }
+  #bay1-iframe { flex: 1; width: 100%; border: none; background: #080c14; }
 
   /* BAY 2: Broadcast Mirror & Laser Pointer */
   #broadcast-frame-container { width: 100%; height: 100%; position: relative; background: #05070a; overflow: hidden; border: 1px solid #1e293b; }
@@ -120,23 +131,39 @@
 
 <div class="grid-container">
 
-  <!-- BAY 1: Live Teams Meeting & Participants -->
+  <!-- BAY 1: Dual-Mode Live Window & Meeting Ingest -->
   <div class="bay-panel" id="bay-1">
     <div class="bay-header">
-      <span>BAY 1 // Teams Meeting & Evaluators Ingest</span>
+      <span id="bay1-header-title">BAY 1 // Live Window & Meeting Ingest</span>
       <div class="bay-controls">
-        <button class="btn-sm" onclick="toggleScreenShare()">Capture Meeting Screen</button>
+        <button class="btn-sm btn-accent" id="btn-mode-toggle" onclick="toggleBay1Mode()">Switch to Standby Workspace</button>
+        <button class="btn-sm" onclick="startWindowCapture()">Capture Live Window</button>
+        <button class="btn-sm" onclick="togglePiP()">Pop-Out PiP</button>
         <button class="btn-sm" onclick="toggleFullscreen('bay-1')">Maximize</button>
       </div>
     </div>
-    <div class="bay-body" style="padding:0;">
-      <div id="video-container">
-        <video id="video-feed" autoplay playsinline></video>
-        <div id="video-fallback" class="video-placeholder">
-          <p><strong>Teams Meeting ID: 286 410 885 824 955</strong></p>
-          <p style="margin-top:6px;">Click 'Capture Meeting Screen' above to mirror the live meeting window.</p>
-        </div>
+    
+    <!-- Mode A: Desktop Window / Meeting Screen Ingest -->
+    <div class="bay-body" id="bay1-capture-view" style="padding:0;">
+      <video id="video-feed" autoplay playsinline></video>
+      <div id="video-fallback">
+        <p style="font-size:13px; font-weight:bold; color:#fff;">Live Desktop Window & Meeting Portal</p>
+        <p style="margin-top:8px;">Click <strong>'Capture Live Window'</strong> to mirror Teams or any active app directly into this bay.</p>
+        <p style="margin-top:6px; color:var(--accent-gold);">Teams Meeting ID: 286 410 885 824 955</p>
+        <p style="margin-top:8px; font-size:11px;">Not in a meeting? Click <strong>'Switch to Standby Workspace'</strong> to load live dashboards, telemetry, or documents.</p>
       </div>
+    </div>
+
+    <!-- Mode B: Standby In-Cockpit Embedded Workspace -->
+    <div class="bay-body" id="bay1-embed-view" style="padding:0;">
+      <div class="embed-toolbar">
+        <button class="btn-sm" onclick="loadBay1Preset('hud')">C2 HUD (8501)</button>
+        <button class="btn-sm" onclick="loadBay1Preset('ingress')">Ingress (8502)</button>
+        <button class="btn-sm" onclick="loadBay1Preset('teams')">Teams Web</button>
+        <input type="text" id="bay1-url-input" placeholder="Enter URL (e.g. http://127.0.0.1:8501)..." onkeydown="if(event.key==='Enter') navigateBay1Url()">
+        <button class="btn-sm btn-accent" onclick="navigateBay1Url()">Load</button>
+      </div>
+      <iframe id="bay1-iframe" src="../CHRONOS_DEFENSE_QUAD_CHART.html"></iframe>
     </div>
   </div>
 
@@ -226,15 +253,60 @@
 </div>
 
 <script>
-  // Bay 1: Screen/Window Capture
-  async function toggleScreenShare() {
+  // Bay 1: Dual-Mode Logic
+  let bay1CurrentMode = 'capture'; // 'capture' or 'embed'
+
+  function toggleBay1Mode() {
+    const captureView = document.getElementById('bay1-capture-view');
+    const embedView = document.getElementById('bay1-embed-view');
+    const toggleBtn = document.getElementById('btn-mode-toggle');
+    const headerTitle = document.getElementById('bay1-header-title');
+
+    if (bay1CurrentMode === 'capture') {
+      captureView.style.display = 'none';
+      embedView.style.display = 'flex';
+      toggleBtn.innerText = 'Switch to Window Capture';
+      headerTitle.innerText = 'BAY 1 // Standby In-Cockpit Workspace';
+      bay1CurrentMode = 'embed';
+    } else {
+      embedView.style.display = 'none';
+      captureView.style.display = 'flex';
+      toggleBtn.innerText = 'Switch to Standby Workspace';
+      headerTitle.innerText = 'BAY 1 // Live Window & Meeting Ingest';
+      bay1CurrentMode = 'capture';
+    }
+  }
+
+  async function startWindowCapture() {
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      if (bay1CurrentMode !== 'capture') toggleBay1Mode();
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: 'window' },
+        audio: true
+      });
       const video = document.getElementById('video-feed');
       video.srcObject = stream;
       document.getElementById('video-fallback').style.display = 'none';
+      stream.getVideoTracks()[0].onended = () => {
+        document.getElementById('video-fallback').style.display = 'flex';
+      };
     } catch (e) {
-      console.log('Capture cancelled or unsupported:', e);
+      console.log('Window capture cancelled or denied:', e);
+    }
+  }
+
+  async function togglePiP() {
+    const video = document.getElementById('video-feed');
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else if (video.srcObject) {
+        await video.requestPictureInPicture();
+      } else {
+        alert('Please capture a live window or meeting stream first before popping out PiP.');
+      }
+    } catch (e) {
+      alert('PiP error: ' + e.message);
     }
   }
 
@@ -245,6 +317,28 @@
     } else {
       document.exitFullscreen();
     }
+  }
+
+  function navigateBay1Url() {
+    const urlInput = document.getElementById('bay1-url-input').value.trim();
+    if (!urlInput) return;
+    const iframe = document.getElementById('bay1-iframe');
+    iframe.src = urlInput.startsWith('http') || urlInput.startsWith('file:') ? urlInput : 'http://' + urlInput;
+  }
+
+  function loadBay1Preset(preset) {
+    const iframe = document.getElementById('bay1-iframe');
+    const input = document.getElementById('bay1-url-input');
+    let target = '';
+    if (preset === 'hud') {
+      target = 'http://127.0.0.1:8501';
+    } else if (preset === 'ingress') {
+      target = 'http://127.0.0.1:8502';
+    } else if (preset === 'teams') {
+      target = 'https://teams.microsoft.com';
+    }
+    input.value = target;
+    iframe.src = target;
   }
 
   // Bay 2: Laser Pointer Implementation
