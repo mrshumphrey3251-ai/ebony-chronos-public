@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EBONY CHRONOS // SOVEREIGN MISSION COMMAND COCKPIT</title>
+<style>
+  :root {
+    --bg-dark: #0a0d14;
+    --panel-bg: #101622;
+    --border: #1e293b;
+    --accent-gold: #fbbf24;
+    --accent-cyan: #38bdf8;
+    --accent-red: #ef4444;
+    --accent-green: #22c55e;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
+  body { background-color: var(--bg-dark); color: var(--text-primary); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  
+  /* Top Header Bar */
+  header {
+    background: #06080d;
+    border-bottom: 2px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; font-weight: bold; }
+  .badge-gold { background: rgba(251,191,36,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-cyan { background: rgba(56,189,248,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--accent-green); border: 1px solid var(--accent-green); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+  /* 4-Bay Grid */
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    flex: 1;
+    height: calc(100vh - 42px);
+  }
+  .bay-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .bay-header {
+    background: #0b111c;
+    border-bottom: 1px solid var(--border);
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+  }
+  .bay-controls { display: flex; gap: 6px; }
+  .btn-sm {
+    background: #1e293b;
+    color: var(--text-primary);
+    border: 1px solid #334155;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .btn-sm:hover { background: #334155; }
+  .bay-body { flex: 1; overflow-y: auto; padding: 10px; position: relative; }
+
+  /* BAY 1: Video Ingest */
+  #video-container { width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+  #video-feed { width: 100%; height: 100%; object-fit: contain; }
+  .video-placeholder { color: var(--text-muted); text-align: center; font-size: 12px; }
+
+  /* BAY 2: Broadcast Mirror & Laser Pointer */
+  #broadcast-frame-container { width: 100%; height: 100%; position: relative; background: #05070a; overflow: hidden; border: 1px solid #1e293b; }
+  #broadcast-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; z-index: 10; }
+  #broadcast-iframe { width: 100%; height: 100%; border: none; }
+  .laser-dot { position: absolute; width: 14px; height: 14px; background: rgba(239,68,68,0.9); border-radius: 50%; box-shadow: 0 0 12px 4px #ef4444; pointer-events: none; transform: translate(-50%, -50%); display: none; z-index: 20; }
+
+  /* BAY 3: Teleprompter & Q&A */
+  .slide-card { background: #0c1322; border-left: 3px solid var(--accent-gold); padding: 10px; margin-bottom: 8px; border-radius: 0 4px 4px 0; }
+  .slide-card h4 { color: var(--accent-gold); font-size: 13px; margin-bottom: 4px; }
+  .slide-card p { font-size: 12px; line-height: 1.4; color: #cbd5e1; }
+  .qa-stream { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 8px; }
+  .qa-item { background: #131d2e; border-left: 3px solid var(--accent-cyan); padding: 8px; margin-bottom: 6px; font-size: 11px; }
+
+  /* BAY 4: Research & Pre-Staging */
+  .research-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+  .research-bar input { flex: 1; background: #080c14; border: 1px solid var(--border); color: #fff; padding: 6px 10px; font-size: 12px; border-radius: 4px; }
+  .research-bar input:focus { outline: none; border-color: var(--accent-cyan); }
+  .staging-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .staging-item { background: #0c1322; border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span>EBONY CHRONOS SOVEREIGN COMMAND COCKPIT</span>
+    <span class="badge-gold">CAGE: 1AHA8</span>
+    <span class="badge-cyan">CEO JEFFERY HUMPHREY (LEVEL 5)</span>
+  </div>
+  <div style="display:flex; gap:12px; align-items:center;">
+    <span class="badge-green">INGRESS: PORT 8502 (ACTIVE)</span>
+    <span style="color:var(--text-muted); font-size:12px;">DOCKET: MON, OCT 5, 2026 @ 10:00 AM CDT</span>
+  </div>
+</header>
+
+<div class="grid-container">
+
+  <!-- BAY 1: Live Teams Meeting & Participants -->
+  <div class="bay-panel" id="bay-1">
+    <div class="bay-header">
+      <span>BAY 1 // Teams Meeting & Evaluators Ingest</span>
+      <div class="bay-controls">
+        <button class="btn-sm" onclick="toggleScreenShare()">Capture Meeting Screen</button>
+        <button class="btn-sm" onclick="toggleFullscreen('bay-1')">Maximize</button>
+      </div>
+    </div>
+    <div class="bay-body" style="padding:0;">
+      <div id="video-container">
+        <video id="video-feed" autoplay playsinline></video>
+        <div id="video-fallback" class="video-placeholder">
+          <p><strong>Teams Meeting ID: 286 410 885 824 955</strong></p>
+          <p style="margin-top:6px;">Click 'Capture Meeting Screen' above to mirror the live meeting window.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAY 3: Teleprompter & Evaluator Q&A -->
+  <div class="bay-panel" id="bay-3">
+    <div class="bay-header">
+      <span>BAY 3 // Speech Teleprompter & Live Q&A Stream</span>
+      <div class="bay-controls">
+        <button class="btn-sm" onclick="advanceSlide(-1)">Prev Slide</button>
+        <button class="btn-sm" onclick="advanceSlide(1)">Next Slide</button>
+      </div>
+    </div>
+    <div class="bay-body" id="teleprompter-body">
+      <div class="slide-card" id="active-slide-card">
+        <h4 id="slide-title">SLIDE #01: Executive Title & Sovereign Authority</h4>
+        <p id="slide-text">"Distinguished evaluators, I am Jeffery Humphrey, CEO of Humphrey Virtual Farms LLC (CAGE: 1AHA8). Today we demonstrate the Ebony Chronos Sovereign Sentinel Platform—a fully air-gapped, zero-RF autonomous tactical edge operating system designed for contested EW environments."</p>
+      </div>
+      <div class="qa-stream">
+        <div style="font-size:11px; font-weight:bold; color:var(--accent-cyan); margin-bottom:6px;">INCOMING EVALUATOR STREAM (PORT 8502)</div>
+        <div class="qa-item">
+          <strong>[DoD Evaluator #1]:</strong> What is your GPS-denied odometry drift rate over 20 km?
+          <div style="color:var(--accent-gold); margin-top:4px;">-> <strong>Rebuttal (OBJ-01):</strong> Passive optical flow bounds drift to < 0.12% without RF emissions.</div>
+        </div>
+        <div class="qa-item">
+          <strong>[Oklahoma Commerce]:</strong> Confirm the $500K non-dilutive matching model.
+          <div style="color:var(--accent-gold); margin-top:4px;">-> <strong>Rebuttal (OBJ-02):</strong> $0 liquid cash escrow required. Satisfied 100% via allowable non-cash in-kind assets.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAY 2: Broadcast Mirror & Tactical Laser Pointer -->
+  <div class="bay-panel" id="bay-2">
+    <div class="bay-header">
+      <span>BAY 2 // Broadcast Mirror & Laser Pointer</span>
+      <div class="bay-controls">
+        <button class="btn-sm" onclick="toggleLaser()">Toggle Laser Pointer</button>
+      </div>
+    </div>
+    <div class="bay-body" style="padding:0;">
+      <div id="broadcast-frame-container">
+        <div class="laser-dot" id="laser-dot"></div>
+        <iframe id="broadcast-iframe" src="../CHRONOS_DEFENSE_QUAD_CHART.html"></iframe>
+        <canvas id="broadcast-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAY 4: Research Bay & Pre-Staging Console -->
+  <div class="bay-panel" id="bay-4">
+    <div class="bay-header">
+      <span>BAY 4 // Executive Research & Pre-Staging Console</span>
+      <div class="bay-controls">
+        <button class="btn-sm" onclick="clearResearch()">Clear</button>
+      </div>
+    </div>
+    <div class="bay-body">
+      <div class="research-bar">
+        <input type="text" id="research-query" placeholder="Type query (e.g. 'DFARS 252.227-7018 GPR', 'Tinker AFB', 'DIU $450M')..." onkeydown="if(event.key==='Enter') executeResearch()">
+        <button class="btn-sm" onclick="executeResearch()" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Query</button>
+      </div>
+      <div id="research-results" style="font-size:11px; color:#cbd5e1; margin-bottom:12px; min-height:40px; background:#080c14; padding:8px; border-radius:4px; border:1px solid #1e293b;">
+        Ready for operator interrogation. Enter key statutory, financial, or engineering search terms.
+      </div>
+      <div style="font-size:11px; font-weight:bold; color:var(--accent-gold); margin-bottom:6px;">PRE-STAGED DEFENSE DELIVERABLES (CLICK TO PUSH TO BROADCAST):</div>
+      <div class="staging-grid">
+        <div class="staging-item">
+          <span>DoD Quad Chart</span>
+          <button class="btn-sm" onclick="stageDocument('QUAD_CHART')">Broadcast</button>
+        </div>
+        <div class="staging-item">
+          <span>Commissioning Dossier</span>
+          <button class="btn-sm" onclick="stageDocument('COMMISSIONING_REPORT')">Broadcast</button>
+        </div>
+        <div class="staging-item">
+          <span>DIU Whitepaper</span>
+          <button class="btn-sm" onclick="stageDocument('DIU_WHITEPAPER')">Broadcast</button>
+        </div>
+        <div class="staging-item">
+          <span>OARS Match Justification</span>
+          <button class="btn-sm" onclick="stageDocument('OARS_JUSTIFICATION')">Broadcast</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Bay 1: Screen/Window Capture
+  async function toggleScreenShare() {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const video = document.getElementById('video-feed');
+      video.srcObject = stream;
+      document.getElementById('video-fallback').style.display = 'none';
+    } catch (e) {
+      console.log('Capture cancelled or unsupported:', e);
+    }
+  }
+
+  function toggleFullscreen(bayId) {
+    const el = document.getElementById(bayId);
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch(err => alert(err.message));
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // Bay 2: Laser Pointer Implementation
+  let laserActive = true;
+  const canvas = document.getElementById('broadcast-canvas');
+  const dot = document.getElementById('laser-dot');
+  const container = document.getElementById('broadcast-frame-container');
+
+  function resizeCanvas() {
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 500);
+
+  container.addEventListener('mousemove', (e) => {
+    if (!laserActive) return;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    dot.style.left = x + 'px';
+    dot.style.top = y + 'px';
+    dot.style.display = 'block';
+  });
+  container.addEventListener('mouseleave', () => { dot.style.display = 'none'; });
+
+  function toggleLaser() {
+    laserActive = !laserActive;
+    if (!laserActive) dot.style.display = 'none';
+  }
+
+  // Bay 3: Slide Advancement
+  let currentSlide = 1;
+  const slideDeck = [
+    { title: "SLIDE #01: Executive Title & Sovereign Authority", text: "Humphrey Virtual Farms LLC (CAGE: 1AHA8). Presenter: CEO Jeffery Humphrey. Bare-metal sovereign sentinel architecture." },
+    { title: "SLIDE #02: The Operational Threat: Contested Spectrum & EW", text: "Commercial drones fail under saturated EW jamming and GPS denial. Chronos operates fully autonomous with zero RF emissions." },
+    { title: "SLIDE #03: The Solution Architecture: Bare-Metal Chronos Engine", text: "Sub-millisecond 50 Hz bare-metal tick execution, local SQLite Merkle audit ledger, and physical sensor abstraction." },
+    { title: "SLIDE #04: Tactical Mission Set 1: CQB & Warfighter BFT", text: "Dismounted squad integration, micro-UAS tunnel and structure clearing, and real-time warfighter physiological triage." },
+    { title: "SLIDE #05: Tactical Mission Set 2: Deep Strike & Swarm Retransmission", text: "20-kilometer standoff interdiction, low probability of intercept (LPI) optical and acoustic meshing." },
+    { title: "SLIDE #06: Federal Track 1: DoD SBIR Direct-to-Phase II ($1.8M)", text: "Direct-to-Phase II acceleration for zero-RF passive optical flow autonomy transitioning to operational test units." },
+    { title: "SLIDE #07: Federal Track 2: DIU Phase 3 Drone Dominance ($450M)", text: "$7,500 unit flyaway target, 60,000 mass-attritable kinetic UAS, 100% NDAA Section 848 supply chain compliance." },
+    { title: "SLIDE #08: Federal Track 3: DoD CDAO Tradewinds Marketplace", text: "Achieved Awardable status for rapid-procurement OTA contracts across DoD service branches." },
+    { title: "SLIDE #09: State Track: Oklahoma Aerospace Corridor & OCAST OARS", text: "$500K non-dilutive state matching grant request. 100% allowable in-kind non-cash contributions ($0 liquid cash escrow required)." },
+    { title: "SLIDE #10: Statutory Governance & Joint Acquisition Roadmap", text: "DFARS 252.227-7018 GPR commercial data rights, NIST SP 800-82, MIL-STD-810H, and complete technical sovereignty." }
+  ];
+
+  function advanceSlide(delta) {
+    currentSlide += delta;
+    if (currentSlide < 1) currentSlide = 1;
+    if (currentSlide > slideDeck.length) currentSlide = slideDeck.length;
+    const card = slideDeck[currentSlide - 1];
+    document.getElementById('slide-title').innerText = card.title;
+    document.getElementById('slide-text').innerText = card.text;
+  }
+
+  // Bay 4: Research & Pre-Staging
+  const knowledgeBase = {
+    "dfars": "DFARS 252.227-7018 GPR: Government Purpose Rights protect private commercial title. Humphrey Virtual Farms retains 100% trade secrets.",
+    "match": "OCAST OARS Match ($500K): Satisfied 100% via allowable non-cash in-kind contributions. Zero liquid cash escrow required under 2 CFR 200.306.",
+    "diu": "DIU Drone Dominance: $450,000,000.00 USD production pipeline for 60,000 attritable sentinels at $7,500 flyaway unit cost.",
+    "tinker": "Tinker AFB Alignment: Direct synergy with Oklahoma City Air Logistics Complex for depot-level avionics maintenance and sustainment.",
+    "fort sill": "Fort Sill Alignment: Field testing corridor at Fires Center of Excellence for kinetic counter-UAS and swarm retransmission trials."
+  };
+
+  function executeResearch() {
+    const q = document.getElementById('research-query').value.toLowerCase();
+    const resBox = document.getElementById('research-results');
+    let found = false;
+    for (const [k, v] of Object.entries(knowledgeBase)) {
+      if (q.includes(k)) {
+        resBox.innerHTML = `<strong>Result for '${k.toUpperCase()}':</strong> ${v}`;         found = true;         break;       }     }     if (!found) {       resBox.innerHTML = `<em>Query '${q}' analyzed across local SQLite archive. General standard DFARS 252.227-7018 applies. Zero liquid cash escrow confirmed.</em>`;
+    }
+  }
+
+  function clearResearch() {
+    document.getElementById('research-query').value = '';
+    document.getElementById('research-results').innerText = 'Ready for operator interrogation.';
+  }
+
+  function stageDocument(docType) {
+    const resBox = document.getElementById('research-results');
+    resBox.innerHTML = `<span style="color:var(--accent-green)">[STAGED FOR BROADCAST]: ${docType} queued into Bay 2 display pipeline.</span>`;
+  }
+</script>
+
+</body>
+</html>
