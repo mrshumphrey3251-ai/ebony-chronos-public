@@ -7,7 +7,9 @@ import hashlib
 import json
 import os
 
-LEDGER_FILE = "chronus_vault.json"
+# HARDENED ABSOLUTE PATH TO BARE METAL VAULT
+VAULT_DIR = r"C:\HVF_Repos\ebony-chronos-private"
+LEDGER_FILE = os.path.join(VAULT_DIR, "chronus_vault.json")
 
 def seal_telemetry_block(current_load, active_power, freq):
     timestamp = time.time()
